@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAppStore } from '@/lib/store';
+import { secureStorage } from '@/lib/storage';
 import Link from 'next/link';
 
 export default function Settings() {
@@ -18,23 +19,34 @@ export default function Settings() {
   } = useAppStore();
   const [showApiKey, setShowApiKey] = useState(false);
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+
+  const handleClearData = () => {
+    if (confirm('Are you sure you want to clear all stored data including API keys?')) {
+      secureStorage.clearAll();
+      setApiKey('');
+      setApiProvider('openrouter');
+      setApiModel('google/gemini-2.5-flash-lite-preview-06-17');
+      alert('All data cleared successfully!');
+    }
+  };
   
   const providerOptions = [
     { 
       value: 'openrouter', 
       label: 'OpenRouter', 
       description: 'Access to multiple models via OpenRouter' 
-    },
-    { 
-      value: 'openai', 
-      label: 'OpenAI', 
-      description: 'Direct OpenAI API access' 
-    },
-    { 
-      value: 'anthropic', 
-      label: 'Anthropic', 
-      description: 'Claude models via Anthropic API' 
     }
+    // Temporarily disabled - focus on OpenRouter for now
+    // { 
+    //   value: 'openai', 
+    //   label: 'OpenAI', 
+    //   description: 'Direct OpenAI API access' 
+    // },
+    // { 
+    //   value: 'anthropic', 
+    //   label: 'Anthropic', 
+    //   description: 'Claude models via Anthropic API' 
+    // }
   ];
 
   const modelOptions = {
@@ -200,9 +212,48 @@ export default function Settings() {
                 )}
                 
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Your API key is stored locally and never sent to our servers
+                  Your API key is stored locally in your browser and never sent to our servers
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Privacy & Data Management */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Privacy & Data Management</h2>
+          
+          <div className="space-y-4">
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-4">
+              <div className="flex items-start gap-2">
+                <span className="text-green-600 dark:text-green-400 mt-0.5">🔒</span>
+                <div>
+                  <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                    Your Privacy is Protected
+                  </p>
+                  <ul className="text-sm text-green-700 dark:text-green-300 mt-1 space-y-1">
+                    <li>• API keys are stored locally in your browser only</li>
+                    <li>• No data is sent to our servers or stored in the cloud</li>
+                    <li>• All processing happens on your device and LLM providers</li>
+                    <li>• Your API keys are never committed to GitHub</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium text-gray-900 dark:text-white">Clear Stored Data</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Remove all locally stored API keys and settings
+                </p>
+              </div>
+              <button
+                onClick={handleClearData}
+                className="px-4 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              >
+                Clear All Data
+              </button>
             </div>
           </div>
         </div>
@@ -213,33 +264,27 @@ export default function Settings() {
           
           <div className="space-y-4">
             <div>
-              <h3 className="font-medium mb-2 text-gray-900 dark:text-white">Where to get your API key:</h3>
+              <h3 className="font-medium mb-2 text-gray-900 dark:text-white">Get your OpenRouter API key:</h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    <strong className="text-gray-900 dark:text-white">OpenRouter:</strong> Visit{' '}
+                    Visit{' '}
                     <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
                       openrouter.ai
-                    </a>{' '}to get your API key
+                    </a>{' '}to create an account and get your API key
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    <strong className="text-gray-900 dark:text-white">OpenAI:</strong> Visit{' '}
-                    <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                      platform.openai.com/api-keys
-                    </a>
+                    Go to "Keys" section in your dashboard
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    <strong className="text-gray-900 dark:text-white">Anthropic:</strong> Visit{' '}
-                    <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                      console.anthropic.com
-                    </a>
+                    Create a new API key and copy it
                   </span>
                 </div>
               </div>

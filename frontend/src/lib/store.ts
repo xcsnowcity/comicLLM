@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import axios from 'axios';
+import { secureStorage, getInitialStoreValues } from './storage';
 
 interface ComicText {
   sequence: number;
@@ -52,28 +53,41 @@ interface AppState {
   testApiConnection: () => Promise<{ success: boolean; message: string }>;
 }
 
-export const useAppStore = create<AppState>((set, get) => ({
-  // Initial state
-  isProcessing: false,
-  currentFile: null,
-  currentResult: null,
-  error: null,
-  apiProvider: 'openrouter',
-  apiModel: 'google/gemini-2.5-flash-lite-preview-06-17',
-  apiKey: '',
-  isTestingApi: false,
-  apiTestResult: null,
+export const useAppStore = create<AppState>((set, get) => {
+  // Get initial values from localStorage
+  const initialValues = getInitialStoreValues();
   
-  // Actions
-  setProcessing: (processing) => set({ isProcessing: processing }),
-  setCurrentFile: (file) => set({ currentFile: file }),
-  setCurrentResult: (result) => set({ currentResult: result }),
-  setError: (error) => set({ error }),
-  setApiProvider: (provider) => set({ apiProvider: provider }),
-  setApiModel: (model) => set({ apiModel: model }),
-  setApiKey: (key) => set({ apiKey: key }),
-  setIsTestingApi: (testing) => set({ isTestingApi: testing }),
-  setApiTestResult: (result) => set({ apiTestResult: result }),
+  return {
+    // Initial state
+    isProcessing: false,
+    currentFile: null,
+    currentResult: null,
+    error: null,
+    apiProvider: initialValues.apiProvider,
+    apiModel: initialValues.apiModel,
+    apiKey: initialValues.apiKey,
+    isTestingApi: false,
+    apiTestResult: null,
+  
+    // Actions
+    setProcessing: (processing) => set({ isProcessing: processing }),
+    setCurrentFile: (file) => set({ currentFile: file }),
+    setCurrentResult: (result) => set({ currentResult: result }),
+    setError: (error) => set({ error }),
+    setApiProvider: (provider) => {
+      set({ apiProvider: provider });
+      secureStorage.saveApiProvider(provider);
+    },
+    setApiModel: (model) => {
+      set({ apiModel: model });
+      secureStorage.saveApiModel(model);
+    },
+    setApiKey: (key) => {
+      set({ apiKey: key });
+      secureStorage.saveApiKey(key);
+    },
+    setIsTestingApi: (testing) => set({ isTestingApi: testing }),
+    setApiTestResult: (result) => set({ apiTestResult: result }),
   
   // API calls
   uploadFile: async (file: File) => {
@@ -136,4 +150,5 @@ export const useAppStore = create<AppState>((set, get) => ({
       setIsTestingApi(false);
     }
   }
-}));
+  };
+});
