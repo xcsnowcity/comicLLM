@@ -8,9 +8,6 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'ComicLLM',
   description: 'Local comic text extraction and translation tool using LLMs',
-  icons: {
-    icon: '/favicon.ico',
-  },
 }
 
 export default function RootLayout({
