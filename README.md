@@ -17,7 +17,7 @@ A local comic text extraction and translation tool using Large Language Models (
 
 ### 1. Clone and Install
 ```bash
-git clone https://github.com/yourusername/comicLLM
+git clone https://github.com/xcsnowcity/comicLLM
 cd comicLLM
 npm run install:all
 ```
