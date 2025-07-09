@@ -1,17 +1,30 @@
 # ComicLLM 📚
 
-A local comic text extraction and translation tool using Large Language Models (LLMs). Extract text from comic pages and translate English to Chinese with contextual explanations.
+A local comic text extraction and translation tool using Large Language Models (LLMs). Extract text from comic pages and translate English to Chinese with contextual explanations for language learning.
 
-![ComicLLM Demo](https://via.placeholder.com/800x400/1a1a1a/ffffff?text=ComicLLM+Demo)
+![ComicLLM Demo](./Main%20Interface.png)
 
 ## ✨ Features
 
+### Core Functionality
 - 🎨 **Smart Text Extraction** - Uses vision-capable LLMs to identify and extract text in proper reading order
 - 🌐 **Intelligent Translation** - English to Chinese translation with cultural context and explanations
+- 📚 **Batch Processing** - Process multiple comic pages at once with smart ordering
+- 🔄 **Progressive Display** - See results as each page completes processing
+- 📤 **Multiple Export Formats** - Save translations as JSON, TXT, or Markdown
+
+### User Experience
 - 🔒 **Privacy First** - Fully local operation, your data never leaves your device
 - 🌙 **Dark Mode** - Beautiful UI that adapts to your system theme
+- 🎯 **Smart File Ordering** - Automatic filename-based sorting with manual reordering
+- ⚡ **Unified Interface** - Single or multiple files handled seamlessly
+- 💫 **Drag & Drop** - Intuitive file management and reordering
+
+### Technical
 - ⚡ **Easy Setup** - No complex configuration, just add your API key and start
 - 💰 **Cost Effective** - Only pay for LLM API usage, no subscription fees
+- 🔧 **Multiple Providers** - OpenRouter, OpenAI, and Anthropic support
+- 🛡️ **Robust Error Handling** - Smart JSON parsing and connection testing
 
 ## 🚀 Quick Start
 
@@ -49,10 +62,11 @@ Open http://localhost:3000
 
 ## 📱 How It Works
 
-1. **Upload** - Drag and drop comic images (JPEG, PNG, GIF, WebP)
-2. **Process** - LLM analyzes the image and extracts text in reading order
-3. **Translate** - Automatic English to Chinese translation with explanations
-4. **Review** - Clean interface shows original text, translations, and cultural context
+1. **Upload Files** - Drag and drop single or multiple comic images (JPEG, PNG, GIF, WebP)
+2. **Smart Ordering** - Automatic filename-based sorting or manual drag-and-drop reordering
+3. **Batch Process** - LLM analyzes each image and extracts text in proper reading order
+4. **Progressive Display** - See translations appear as each page completes processing
+5. **Export Results** - Save your translations in JSON, TXT, or Markdown format
 
 ## 🛠 Development
 
@@ -92,21 +106,40 @@ comicLLM/
 ## 📸 Screenshots
 
 ### Main Interface
-![Main Interface](https://via.placeholder.com/600x400/f3f4f6/374151?text=Upload+Interface)
+Upload single or multiple comic pages with smart ordering and drag-and-drop reordering.
+![Main Interface](./Main%20Interface.png)
+
+### Batch Processing
+Process multiple pages with progressive display and status tracking.
+![Translation Results 2](./Text%20Extraction%20and%20Translation%20Results1.png)
 
 ### Text Extraction Results
-![Results](https://via.placeholder.com/600x400/f3f4f6/374151?text=Translation+Results)
+Clean display of extracted text with translations and cultural explanations.
+![Translation Results 1](./Text%20Extraction%20and%20Translation%20Results2.png)
 
 ### Settings Page
-![Settings](https://via.placeholder.com/600x400/f3f4f6/374151?text=Settings+Page)
+Simple configuration with API key management and connection testing.
+![Settings](./Settings.png)
 
 ## 🌟 Roadmap
 
-- [ ] **Export Functionality** - Save translations as JSON, TXT, Markdown
-- [ ] **Batch Processing** - Process multiple pages at once
+### ✅ Completed
+- [x] **Export Functionality** - Save translations as JSON, TXT, Markdown
+- [x] **Batch Processing** - Process multiple pages at once with smart ordering
+- [x] **Unified Interface** - Single mode supporting both single and multiple files
+- [x] **Drag & Drop Reordering** - Manual page ordering with visual feedback
+- [x] **Progressive Display** - Real-time results as pages complete
+- [x] **Smart File Sorting** - Automatic filename-based ordering
+- [x] **Robust Error Handling** - Improved JSON parsing and connection testing
+
+### 🚧 In Progress
 - [ ] **Session Management** - Save and resume processing sessions
+
+### 📋 Planned
 - [ ] **Translation Editing** - Manual correction capabilities
 - [ ] **Multi-language Support** - Support for other language pairs
+- [ ] **Archive Support** - Direct CBR/CBZ file processing
+- [ ] **Performance Optimization** - Enhanced processing for large batches
 
 ## 🤝 Contributing
 
