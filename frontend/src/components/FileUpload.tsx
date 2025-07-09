@@ -4,25 +4,25 @@ import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 
 interface FileUploadProps {
-  onFileSelect: (file: File) => void;
+  onFilesSelect: (files: File[]) => void;
   isProcessing?: boolean;
 }
 
-export default function FileUpload({ onFileSelect, isProcessing = false }: FileUploadProps) {
+export default function FileUpload({ onFilesSelect, isProcessing = false }: FileUploadProps) {
   const [dragActive, setDragActive] = useState(false);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
-      onFileSelect(acceptedFiles[0]);
+      onFilesSelect(acceptedFiles);
     }
-  }, [onFileSelect]);
+  }, [onFilesSelect]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
       'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp']
     },
-    multiple: false,
+    multiple: true,
     disabled: isProcessing
   });
 
@@ -46,15 +46,15 @@ export default function FileUpload({ onFileSelect, isProcessing = false }: FileU
         </div>
         
         <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
-          {isProcessing ? 'Processing...' : 'Upload Comic Image'}
+          {isProcessing ? 'Processing...' : 'Upload Comic Pages'}
         </h2>
         
         <p className="text-gray-600 dark:text-gray-300 mb-6">
           {isProcessing 
-            ? 'Please wait while we analyze your comic...'
+            ? 'Please wait while we analyze your comics...'
             : isDragActive 
-              ? 'Drop the comic image here'
-              : 'Drop a comic page here or click to select'
+              ? 'Drop the comic pages here'
+              : 'Drop comic pages here or click to select'
           }
         </p>
         
@@ -63,13 +63,15 @@ export default function FileUpload({ onFileSelect, isProcessing = false }: FileU
             className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors"
             disabled={isProcessing}
           >
-            Select Image
+            Select Pages
           </button>
         )}
       </div>
       
       <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-        Supported formats: JPEG, PNG, GIF, WebP (max 10MB)
+        Supported formats: JPEG, PNG, GIF, WebP (max 10MB each)
+        <br />
+        Select single or multiple files - smart ordering applied automatically
       </div>
     </div>
   );

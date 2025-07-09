@@ -3,41 +3,88 @@
 import { useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import FileUpload from '@/components/FileUpload';
+import FilePreview from '@/components/FilePreview';
 import TextDisplay from '@/components/TextDisplay';
 import ExportOptions from '@/components/ExportOptions';
+import BatchDisplay from '@/components/BatchDisplay';
+import { smartSortFiles, FileItem, fileItemsToFiles } from '@/lib/fileUtils';
 
 export default function Home() {
+  const [selectedFiles, setSelectedFiles] = useState<FileItem[]>([]);
+  const [duplicateMessage, setDuplicateMessage] = useState<string | null>(null);
+  
   const {
     isProcessing,
     currentFile,
     currentResult,
     error,
+    batchMode,
+    batchPages,
+    batchProcessing,
     setProcessing,
     setCurrentFile,
     setCurrentResult,
     setError,
     uploadFile,
-    processComic
+    processComic,
+    processBatch,
+    resetBatch
   } = useAppStore();
 
-  const handleFileSelect = async (file: File) => {
+  const handleFilesSelect = (files: File[]) => {
+    // Get existing file names to avoid duplicates
+    const existingFileNames = new Set(selectedFiles.map(f => f.file.name));
+    
+    // Filter out duplicate files
+    const newFiles = files.filter(file => !existingFileNames.has(file.name));
+    const duplicateCount = files.length - newFiles.length;
+    
+    if (newFiles.length === 0) {
+      // All files were duplicates, show a message
+      setDuplicateMessage(`${duplicateCount} file${duplicateCount > 1 ? 's' : ''} already selected`);
+      setTimeout(() => setDuplicateMessage(null), 3000);
+      return;
+    }
+    
+    // Show duplicate message if some files were duplicates
+    if (duplicateCount > 0) {
+      setDuplicateMessage(`${duplicateCount} duplicate file${duplicateCount > 1 ? 's' : ''} ignored`);
+      setTimeout(() => setDuplicateMessage(null), 3000);
+    }
+    
+    // Combine existing and new files
+    const allFiles = [...selectedFiles.map(f => f.file), ...newFiles];
+    
+    // Apply smart sorting to all files
+    const sortedFiles = smartSortFiles(allFiles);
+    setSelectedFiles(sortedFiles);
+    setError(null);
+  };
+
+  const handleFilesReorder = (reorderedFiles: FileItem[]) => {
+    setSelectedFiles(reorderedFiles);
+  };
+
+  const handleRemoveFile = (fileId: string) => {
+    const newFiles = selectedFiles.filter(f => f.id !== fileId);
+    // Update order numbers
+    const reorderedFiles = newFiles.map((file, index) => ({
+      ...file,
+      order: index + 1
+    }));
+    setSelectedFiles(reorderedFiles);
+  };
+
+  const handleProcessFiles = async () => {
+    if (selectedFiles.length === 0) return;
+    
     try {
       setError(null);
-      setProcessing(true);
-      setCurrentFile(file);
-      
-      // Upload file
-      const { filename, sessionId } = await uploadFile(file);
-      
-      // Process comic
-      const result = await processComic(filename, sessionId);
-      setCurrentResult(result);
-      
+      const files = fileItemsToFiles(selectedFiles);
+      await processBatch(files);
     } catch (err) {
-      console.error('Error processing comic:', err);
-      setError(err instanceof Error ? err.message : 'Failed to process comic');
-    } finally {
-      setProcessing(false);
+      console.error('Error processing files:', err);
+      setError(err instanceof Error ? err.message : 'Failed to process files');
     }
   };
 
@@ -45,6 +92,8 @@ export default function Home() {
     setCurrentFile(null);
     setCurrentResult(null);
     setError(null);
+    setSelectedFiles([]);
+    resetBatch();
   };
 
   return (
@@ -71,88 +120,45 @@ export default function Home() {
         </div>
       )}
 
-      {/* Main Content */}
-      {!currentResult ? (
-        <FileUpload
-          onFileSelect={handleFileSelect}
-          isProcessing={isProcessing}
-        />
-      ) : (
-        <div>
-          {/* File Info and Actions */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-lg">
-              <span className="text-sm font-medium text-gray-900 dark:text-white">Processed:</span>
-              <span className="text-sm text-gray-700 dark:text-gray-300">{currentFile?.name}</span>
-              <div className="flex items-center gap-2 ml-2">
-                <ExportOptions 
-                  result={currentResult}
-                  filename={currentFile?.name || 'comic'}
-                />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      handleFileSelect(file);
-                    }
-                  }}
-                  className="hidden"
-                  id="new-file-input"
-                  disabled={isProcessing}
-                />
-                <label
-                  htmlFor="new-file-input"
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-                    isProcessing 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-                  } text-white`}
-                >
-                  {isProcessing ? (
-                    <>
-                      <span className="animate-spin">⏳</span>
-                      <span>Processing...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>📁</span>
-                      <span>Upload New</span>
-                    </>
-                  )}
-                </label>
-              </div>
-            </div>
+      {/* Duplicate Files Message */}
+      {duplicateMessage && (
+        <div className="max-w-2xl mx-auto mb-8 p-4 bg-yellow-100 dark:bg-yellow-900 border border-yellow-300 dark:border-yellow-600 rounded-lg">
+          <div className="flex items-center gap-2">
+            <span className="text-yellow-600 dark:text-yellow-400">ℹ️</span>
+            <p className="text-yellow-800 dark:text-yellow-200">{duplicateMessage}</p>
           </div>
-
-          {/* Processing Overlay */}
-          {isProcessing && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md mx-4">
-                <div className="text-center">
-                  <div className="text-6xl mb-4 animate-spin">⏳</div>
-                  <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
-                    Processing New Comic
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    Analyzing image and extracting text...
-                  </p>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    This may take a few moments
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Text Display */}
-          <TextDisplay
-            texts={currentResult.reading_order}
-            pageNumber={currentResult.page_number}
-          />
         </div>
       )}
+
+      {/* Main Content */}
+      {!batchMode ? (
+        <>
+          {/* File Upload */}
+          <FileUpload
+            onFilesSelect={handleFilesSelect}
+            isProcessing={batchProcessing}
+          />
+          
+          {/* File Preview (if files selected) */}
+          {selectedFiles.length > 0 && (
+            <div className="mt-12">
+              <FilePreview
+                files={selectedFiles}
+                onFilesReorder={handleFilesReorder}
+                onRemoveFile={handleRemoveFile}
+                onProcessFiles={handleProcessFiles}
+                isProcessing={batchProcessing}
+              />
+            </div>
+          )}
+        </>
+      ) : (
+        <BatchDisplay
+          pages={batchPages}
+          onReset={handleReset}
+        />
+      )}
+      
     </main>
   );
 }
