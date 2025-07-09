@@ -56,6 +56,8 @@ For each text element, provide:
 5. Chinese translation (natural, contextual translation)
 6. Brief explanations for difficult words/phrases (if any)
 
+IMPORTANT: Return ONLY valid JSON. Do not include any text before or after the JSON. Ensure all strings are properly escaped.
+
 Output as JSON format with this structure:
 {
   "page_number": 1,
@@ -107,6 +109,7 @@ Be thorough - don't miss any text including small sound effects or background si
           ]
         }
       ],
+      max_tokens: 8000,
       response_format: { type: 'json_object' }
     }, {
       headers: {
@@ -157,7 +160,7 @@ Be thorough - don't miss any text including small sound effects or background si
 
     const response = await axios.post('https://api.anthropic.com/v1/messages', {
       model: model,
-      max_tokens: 4000,
+      max_tokens: 8000,
       messages: [
         {
           role: 'user',
@@ -266,35 +269,141 @@ Be thorough - don't miss any text including small sound effects or background si
 
   parseResponse(response) {
     try {
-      const parsed = JSON.parse(response);
+      // Clean the response by extracting JSON from potential markdown code blocks or extra text
+      let cleanResponse = response.trim();
       
-      // Validate response structure
-      if (!parsed.reading_order || !Array.isArray(parsed.reading_order)) {
-        throw new Error('Invalid response format: missing or invalid reading_order');
+      // Remove markdown code blocks if present
+      if (cleanResponse.startsWith('```json')) {
+        cleanResponse = cleanResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanResponse.startsWith('```')) {
+        cleanResponse = cleanResponse.replace(/^```\s*/, '').replace(/\s*```$/, '');
       }
       
-      // Ensure page_number exists
-      if (!parsed.page_number) {
-        parsed.page_number = 1;
+      // Find JSON content between braces
+      const jsonMatch = cleanResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        cleanResponse = jsonMatch[0];
       }
       
-      // Validate each reading order item
-      parsed.reading_order.forEach((item, index) => {
-        if (!item.sequence || !item.type || !item.original_text) {
-          throw new Error(`Invalid reading order item at index ${index}`);
+      // Check if JSON appears to be truncated and try to complete it
+      if (cleanResponse && !cleanResponse.trim().endsWith('}')) {
+        console.warn('JSON appears truncated, attempting to complete...');
+        
+        // Count open braces and brackets to determine what's missing
+        let openBraces = 0;
+        let openBrackets = 0;
+        let inString = false;
+        let escaped = false;
+        
+        for (let i = 0; i < cleanResponse.length; i++) {
+          const char = cleanResponse[i];
+          
+          if (escaped) {
+            escaped = false;
+            continue;
+          }
+          
+          if (char === '\\') {
+            escaped = true;
+            continue;
+          }
+          
+          if (char === '"' && !escaped) {
+            inString = !inString;
+            continue;
+          }
+          
+          if (!inString) {
+            if (char === '{') openBraces++;
+            else if (char === '}') openBraces--;
+            else if (char === '[') openBrackets++;
+            else if (char === ']') openBrackets--;
+          }
         }
         
-        // Ensure explanations is an array
-        if (!item.explanations) {
-          item.explanations = [];
+        // Close any unclosed strings, arrays, and objects
+        if (inString) {
+          cleanResponse += '"';
         }
-      });
+        
+        // Close unclosed arrays
+        for (let i = 0; i < openBrackets; i++) {
+          cleanResponse += ']';
+        }
+        
+        // Close unclosed objects
+        for (let i = 0; i < openBraces; i++) {
+          cleanResponse += '}';
+        }
+        
+        console.log('Completed JSON structure');
+      }
       
-      return parsed;
+      // Fix common JSON issues
+      cleanResponse = cleanResponse
+        .replace(/,\s*}/g, '}')  // Remove trailing commas before closing braces
+        .replace(/,\s*]/g, ']')  // Remove trailing commas before closing brackets
+        .replace(/([{,]\s*)(\w+):/g, '$1"$2":')  // Quote unquoted keys
+        .replace(/:\s*'([^']*)'/g, ': "$1"');  // Convert single quotes to double quotes
+      
+      // Try to use JSON5 or relaxed parsing for better handling
+      try {
+        // First attempt: parse as-is
+        const parsed = JSON.parse(cleanResponse);
+        return this.validateAndProcessResponse(parsed);
+      } catch (firstError) {
+        // Second attempt: fix common issues
+        console.log('First JSON parse failed, trying to fix common issues...');
+        
+        // More careful string fixing - only fix obvious issues
+        let fixedResponse = cleanResponse;
+        
+        // Fix unescaped newlines within string values (not affecting structure)
+        fixedResponse = fixedResponse.replace(/": "([^"]*)\n([^"]*)"(?=\s*[,\]}])/g, '": "$1\\n$2"');
+        
+        // Fix unescaped quotes within string values
+        fixedResponse = fixedResponse.replace(/": "([^"]*)"([^"]*)"([^"]*)"(?=\s*[,\]}])/g, '": "$1\\"$2\\"$3"');
+        
+        try {
+          const parsed = JSON.parse(fixedResponse);
+          return this.validateAndProcessResponse(parsed);
+        } catch (secondError) {
+          console.error('Both JSON parse attempts failed');
+          throw firstError;
+        }
+      }
     } catch (error) {
       console.error('Failed to parse LLM response:', error);
+      console.error('Raw response (first 2000 chars):', response.substring(0, 2000));
+      console.error('Raw response length:', response.length);
       throw new Error('Failed to parse LLM response');
     }
+  }
+  
+  validateAndProcessResponse(parsed) {
+    // Validate response structure
+    if (!parsed.reading_order || !Array.isArray(parsed.reading_order)) {
+      throw new Error('Invalid response format: missing or invalid reading_order');
+    }
+    
+    // Ensure page_number exists
+    if (!parsed.page_number) {
+      parsed.page_number = 1;
+    }
+    
+    // Validate each reading order item
+    parsed.reading_order.forEach((item, index) => {
+      if (!item.sequence || !item.type || !item.original_text) {
+        throw new Error(`Invalid reading order item at index ${index}`);
+      }
+      
+      // Ensure explanations is an array
+      if (!item.explanations) {
+        item.explanations = [];
+      }
+    });
+    
+    return parsed;
   }
 }
 

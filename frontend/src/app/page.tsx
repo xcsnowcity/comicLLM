@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import FileUpload from '@/components/FileUpload';
 import TextDisplay from '@/components/TextDisplay';
+import ExportOptions from '@/components/ExportOptions';
 
 export default function Home() {
   const {
@@ -78,19 +79,72 @@ export default function Home() {
         />
       ) : (
         <div>
-          {/* File Info */}
+          {/* File Info and Actions */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-lg">
               <span className="text-sm font-medium text-gray-900 dark:text-white">Processed:</span>
               <span className="text-sm text-gray-700 dark:text-gray-300">{currentFile?.name}</span>
-              <button
-                onClick={handleReset}
-                className="ml-2 px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
-              >
-                Upload New
-              </button>
+              <div className="flex items-center gap-2 ml-2">
+                <ExportOptions 
+                  result={currentResult}
+                  filename={currentFile?.name || 'comic'}
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleFileSelect(file);
+                    }
+                  }}
+                  className="hidden"
+                  id="new-file-input"
+                  disabled={isProcessing}
+                />
+                <label
+                  htmlFor="new-file-input"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                    isProcessing 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                  } text-white`}
+                >
+                  {isProcessing ? (
+                    <>
+                      <span className="animate-spin">⏳</span>
+                      <span>Processing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>📁</span>
+                      <span>Upload New</span>
+                    </>
+                  )}
+                </label>
+              </div>
             </div>
           </div>
+
+          {/* Processing Overlay */}
+          {isProcessing && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md mx-4">
+                <div className="text-center">
+                  <div className="text-6xl mb-4 animate-spin">⏳</div>
+                  <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
+                    Processing New Comic
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    Analyzing image and extracting text...
+                  </p>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    This may take a few moments
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Text Display */}
           <TextDisplay

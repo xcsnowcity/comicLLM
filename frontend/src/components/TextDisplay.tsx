@@ -103,14 +103,14 @@ export default function TextDisplay({ texts, pageNumber }: TextDisplayProps) {
               
               <div className="flex-grow">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="bg-white px-2 py-1 rounded text-sm font-medium">
+                  <span className="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">
                     #{text.sequence}
                   </span>
-                  <span className="text-sm text-gray-600 capitalize">
+                  <span className="text-sm text-gray-600 dark:text-gray-400 capitalize">
                     {text.type.replace('_', ' ')}
                   </span>
                   {text.character && (
-                    <span className="bg-white px-2 py-1 rounded text-sm font-medium text-blue-600">
+                    <span className="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">
                       {text.character}
                     </span>
                   )}
