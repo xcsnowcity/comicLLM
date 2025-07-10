@@ -2,7 +2,7 @@
 
 A local comic text extraction and translation tool using Large Language Models (LLMs). Extract text from comic pages and translate English to Chinese with contextual explanations for language learning.
 
-![ComicLLM Demo](./Main%20Interface.png)
+![ComicLLM Demo](./screenshots/Main%20Interface.png)
 
 ## ✨ Features
 
@@ -107,19 +107,19 @@ comicLLM/
 
 ### Main Interface
 Upload single or multiple comic pages with smart ordering and drag-and-drop reordering.
-![Main Interface](./Main%20Interface.png)
+![Main Interface](./screenshots/Main%20Interface.png)
 
 ### Batch Processing
 Process multiple pages with progressive display and status tracking.
-![Translation Results 2](./Text%20Extraction%20and%20Translation%20Results1.png)
+![Translation Results 2](./screenshots/Text%20Extraction%20and%20Translation%20Results1.png)
 
 ### Text Extraction Results
 Clean display of extracted text with translations and cultural explanations.
-![Translation Results 1](./Text%20Extraction%20and%20Translation%20Results2.png)
+![Translation Results 1](./screenshots/Text%20Extraction%20and%20Translation%20Results2.png)
 
 ### Settings Page
 Simple configuration with API key management and connection testing.
-![Settings](./Settings.png)
+![Settings](./screenshots/Settings.png)
 
 ## 🌟 Roadmap
 
