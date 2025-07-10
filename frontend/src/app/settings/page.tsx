@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import { secureStorage } from '@/lib/storage';
+import StorageManager from '@/components/StorageManager';
+import SessionManager from '@/components/SessionManager';
 import Link from 'next/link';
 
 export default function Settings() {
@@ -80,6 +82,11 @@ export default function Settings() {
           <p className="text-gray-600">
             Configure your API settings and model preferences
           </p>
+        </div>
+
+        {/* Comic Book Library */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+          <SessionManager />
         </div>
 
         {/* API Configuration */}
@@ -306,6 +313,9 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Storage Management */}
+        <StorageManager />
+
         {/* Usage Tips */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Usage Tips</h2>
@@ -322,6 +332,9 @@ export default function Settings() {
             </div>
             <div>
               <strong className="text-gray-900 dark:text-white">Languages:</strong> Currently optimized for English to Chinese translation
+            </div>
+            <div>
+              <strong className="text-gray-900 dark:text-white">Storage:</strong> Hash-based deduplication automatically saves space by storing identical files only once
             </div>
           </div>
         </div>

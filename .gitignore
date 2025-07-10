@@ -19,6 +19,7 @@ build/
 storage/uploads/*
 storage/results/*
 storage/exports/*
+storage/sessions/*
 storage/temp/*
 
 # Keep directory structure

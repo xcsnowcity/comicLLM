@@ -5,6 +5,8 @@ const STORAGE_KEYS = {
   API_KEY: 'comicllm_api_key',
   API_PROVIDER: 'comicllm_api_provider',
   API_MODEL: 'comicllm_api_model',
+  CURRENT_SESSION: 'comicllm_current_session',
+  AUTO_SAVE_ENABLED: 'comicllm_auto_save_enabled',
 } as const;
 
 export const secureStorage = {
@@ -63,11 +65,58 @@ export const secureStorage = {
   }
 };
 
+// Session persistence utilities
+export const sessionStorage = {
+  // Save current session ID
+  saveCurrentSession: (sessionId: string | null): void => {
+    if (typeof window !== 'undefined') {
+      if (sessionId) {
+        localStorage.setItem(STORAGE_KEYS.CURRENT_SESSION, sessionId);
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.CURRENT_SESSION);
+      }
+    }
+  },
+
+  // Get current session ID
+  getCurrentSession: (): string | null => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(STORAGE_KEYS.CURRENT_SESSION);
+    }
+    return null;
+  },
+
+  // Save auto-save setting
+  saveAutoSaveEnabled: (enabled: boolean): void => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEYS.AUTO_SAVE_ENABLED, enabled.toString());
+    }
+  },
+
+  // Get auto-save setting
+  getAutoSaveEnabled: (): boolean => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEYS.AUTO_SAVE_ENABLED);
+      return saved ? saved === 'true' : true; // Default to true
+    }
+    return true;
+  },
+
+  // Clear session data
+  clearSessionData: (): void => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEYS.CURRENT_SESSION);
+    }
+  }
+};
+
 // Initialize store with persisted values
 export const getInitialStoreValues = () => {
   return {
     apiKey: secureStorage.getApiKey(),
     apiProvider: secureStorage.getApiProvider() as 'openrouter' | 'openai' | 'anthropic',
     apiModel: secureStorage.getApiModel(),
+    currentSessionId: sessionStorage.getCurrentSession(),
+    autoSaveEnabled: sessionStorage.getAutoSaveEnabled(),
   };
 };

@@ -7,6 +7,7 @@ import FilePreview from '@/components/FilePreview';
 import TextDisplay from '@/components/TextDisplay';
 import ExportOptions from '@/components/ExportOptions';
 import BatchDisplay from '@/components/BatchDisplay';
+import SessionControl from '@/components/SessionControl';
 import { smartSortFiles, FileItem, fileItemsToFiles } from '@/lib/fileUtils';
 
 export default function Home() {
@@ -133,6 +134,11 @@ export default function Home() {
       {/* Main Content */}
       {!batchMode ? (
         <>
+          {/* Session Control */}
+          <div className="max-w-4xl mx-auto mb-8">
+            <SessionControl />
+          </div>
+          
           {/* File Upload */}
           <FileUpload
             onFilesSelect={handleFilesSelect}
