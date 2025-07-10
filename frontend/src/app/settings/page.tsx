@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { secureStorage } from '@/lib/storage';
 import StorageManager from '@/components/StorageManager';
@@ -21,6 +21,11 @@ export default function Settings() {
   } = useAppStore();
   const [showApiKey, setShowApiKey] = useState(false);
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleClearData = () => {
     if (confirm('Are you sure you want to clear all stored data including API keys?')) {
@@ -170,7 +175,7 @@ export default function Settings() {
                   <button
                     type="button"
                     onClick={testApiConnection}
-                    disabled={!apiKey.trim() || isTestingApi}
+                    disabled={!isClient || !apiKey || !apiKey.trim() || isTestingApi}
                     className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
                     {isTestingApi ? (
