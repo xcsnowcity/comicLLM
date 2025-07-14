@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import axios from 'axios';
 import { secureStorage, sessionStorage, getInitialStoreValues } from './storage';
+import { toastManager } from './toastManager';
 
 interface ComicText {
   sequence: number;
@@ -408,9 +409,9 @@ export const useAppStore = create<AppState>((set, get) => {
     }
     
     if (sessionCreated && sessionId) {
-      alert(`Pages translated! Your work has been auto-saved to a new comic book. Future pages will be added to the same book.`);
+      toastManager.success(`Pages translated! Your work has been auto-saved to a new comic book. Future pages will be added to the same book.`, 6000);
     } else if (autoSaveEnabled && sessionId) {
-      alert(`Pages translated! Your work has been auto-saved to the current comic book.`);
+      toastManager.success(`Pages translated! Your work has been auto-saved to the current comic book.`, 6000);
     }
   },
   

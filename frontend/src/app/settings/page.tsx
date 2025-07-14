@@ -322,7 +322,7 @@ export default function Settings() {
         <StorageManager />
 
         {/* Usage Tips */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mt-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Usage Tips</h2>
           
           <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">

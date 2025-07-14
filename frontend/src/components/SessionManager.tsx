@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
+import { toastManager } from '@/lib/toastManager';
 
 interface Session {
   id: string;
@@ -85,10 +86,10 @@ export default function SessionManager() {
       setNewSessionName('');
       setNewSessionDescription('');
       
-      alert(`Now reading: ${session.name}`);
+      toastManager.success(`Now reading: ${session.name}`, 4000);
     } catch (error) {
       console.error('Failed to create session:', error);
-      alert('Failed to create session. Please try again.');
+      toastManager.error('Failed to create session. Please try again.');
     }
   };
 
@@ -142,12 +143,16 @@ export default function SessionManager() {
       const session = await getSession(sessionId);
       setCurrentSessionId(sessionId);
       setCurrentSession(session);
-      alert(`Now reading: ${session.name}`);
+      // Store message to show on home page after redirect
+      sessionStorage.setItem('continuedSession', JSON.stringify({
+        message: `Now reading: ${session.name}`,
+        type: 'success'
+      }));
       // Optionally redirect to main page
       window.location.href = '/';
     } catch (error) {
       console.error('Failed to continue session:', error);
-      alert('Failed to continue session. Please try again.');
+      toastManager.error('Failed to continue session. Please try again.');
     }
   };
 

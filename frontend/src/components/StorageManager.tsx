@@ -33,6 +33,7 @@ interface StorageStats {
 export default function StorageManager() {
   const [stats, setStats] = useState<StorageStats | null>(null);
   const [duplicates, setDuplicates] = useState<string[][]>([]);
+  const [duplicatesScanPerformed, setDuplicatesScanPerformed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [cleanupLoading, setCleanupLoading] = useState(false);
   const { getStorageStats, findDuplicates, cleanupStorage } = useAppStore();
@@ -54,6 +55,7 @@ export default function StorageManager() {
     try {
       const duplicatesData = await findDuplicates();
       setDuplicates(duplicatesData.duplicates || []);
+      setDuplicatesScanPerformed(true);
     } catch (error) {
       console.error('Failed to find duplicates:', error);
     } finally {
@@ -226,7 +228,7 @@ export default function StorageManager() {
         </div>
       )}
 
-      {duplicates.length === 0 && duplicates !== null && (
+      {duplicates.length === 0 && duplicatesScanPerformed && (
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
           <div className="text-center text-gray-600 dark:text-gray-400">
             ✅ No duplicate files found! Your storage is efficiently organized.

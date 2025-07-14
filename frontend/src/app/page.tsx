@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
+import { toastManager } from '@/lib/toastManager';
 import FileUpload from '@/components/FileUpload';
 import FilePreview from '@/components/FilePreview';
 import TextDisplay from '@/components/TextDisplay';
@@ -31,6 +32,29 @@ export default function Home() {
     processBatch,
     resetBatch
   } = useAppStore();
+
+  // Check for continued session message on page load
+  useEffect(() => {
+    const storedMessage = sessionStorage.getItem('continuedSession');
+    if (storedMessage) {
+      try {
+        const { message, type } = JSON.parse(storedMessage);
+        // Add a small delay to ensure toast manager is ready
+        setTimeout(() => {
+          if (type === 'success') {
+            toastManager.success(message, 4000);
+          } else if (type === 'error') {
+            toastManager.error(message);
+          }
+        }, 100);
+        // Clear the message after showing it
+        sessionStorage.removeItem('continuedSession');
+      } catch (error) {
+        console.error('Failed to parse continued session message:', error);
+        sessionStorage.removeItem('continuedSession');
+      }
+    }
+  }, []);
 
   const handleFilesSelect = (files: File[]) => {
     // Get existing file names to avoid duplicates
