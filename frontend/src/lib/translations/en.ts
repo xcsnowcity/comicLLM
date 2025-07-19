@@ -11,6 +11,7 @@ export const en: TranslationKeys = {
   app: {
     title: 'ComicLLM',
     subtitle: 'Local comic text extraction and translation tool using LLMs',
+    github: 'View on GitHub',
   },
   
   common: {

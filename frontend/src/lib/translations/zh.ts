@@ -11,6 +11,7 @@ export const zh: TranslationKeys = {
   app: {
     title: 'ComicLLM',
     subtitle: '使用大语言模型的本地漫画文本提取和翻译工具',
+    github: '在GitHub上查看',
   },
   
   common: {

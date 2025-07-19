@@ -14,6 +14,7 @@ export interface TranslationKeys {
   app: {
     title: string;
     subtitle: string;
+    github: string;
   };
   
   // Common buttons and actions
