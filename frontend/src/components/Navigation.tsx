@@ -2,13 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useT } from '@/lib/i18nContext';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navigation() {
   const pathname = usePathname();
+  const t = useT();
 
   const navItems = [
-    { href: '/', label: 'Home', icon: '🏠' },
-    { href: '/settings', label: 'Settings', icon: '⚙️' }
+    { href: '/', label: t.nav.home, icon: '🏠' },
+    { href: '/settings', label: t.nav.settings, icon: '⚙️' }
   ];
 
   return (
@@ -20,23 +23,27 @@ export default function Navigation() {
             <span className="text-xl font-bold text-gray-900 dark:text-white">ComicLLM</span>
           </div>
           
-          <div className="flex items-center gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`
-                  flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors
-                  ${pathname === item.href 
-                    ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200' 
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }
-                `}
-              >
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
-              </Link>
-            ))}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`
+                    flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors
+                    ${pathname === item.href 
+                      ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200' 
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }
+                  `}
+                >
+                  <span>{item.icon}</span>
+                  <span>{item.label}</span>
+                </Link>
+              ))}
+            </div>
+            
+            <LanguageSwitcher />
           </div>
         </div>
       </div>

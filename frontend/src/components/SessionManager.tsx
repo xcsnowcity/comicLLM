@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { toastManager } from '@/lib/toastManager';
+import { useT } from '@/lib/i18nContext';
 
 interface Session {
   id: string;
@@ -39,6 +40,9 @@ export default function SessionManager() {
   const [viewingTranslations, setViewingTranslations] = useState<Session | null>(null);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [loadingTranslations, setLoadingTranslations] = useState(false);
+  const [pageJumpInput, setPageJumpInput] = useState('');
+  
+  const t = useT();
 
   const {
     getAllSessions,
@@ -86,7 +90,7 @@ export default function SessionManager() {
       setNewSessionName('');
       setNewSessionDescription('');
       
-      toastManager.success(`Now reading: ${session.name}`, 4000);
+      toastManager.success(`${t.session.nowReading}: ${session.name}`, 4000);
     } catch (error) {
       console.error('Failed to create session:', error);
       toastManager.error('Failed to create session. Please try again.');
@@ -104,7 +108,7 @@ export default function SessionManager() {
   };
 
   const handleDeleteSession = async (sessionId: string) => {
-    if (!confirm('Are you sure you want to delete this comic book? Original files will be preserved.')) {
+    if (!confirm(t.library.deleteConfirm)) {
       return;
     }
 
@@ -121,7 +125,7 @@ export default function SessionManager() {
         setCurrentSession(null);
       }
       
-      alert('Comic book deleted successfully.');
+      alert(t.library.comicDeleted);
     } catch (error) {
       console.error('Failed to delete session:', error);
       alert('Failed to delete session. Please try again.');
@@ -131,7 +135,7 @@ export default function SessionManager() {
   const handleExportSession = async (sessionId: string, format: 'json' | 'txt' | 'md') => {
     try {
       const result = await exportSession(sessionId, format);
-      alert(`Session exported successfully as ${result.filename}`);
+      alert(`${t.library.exportSuccess} ${result.filename}`);
     } catch (error) {
       console.error('Failed to export session:', error);
       alert('Failed to export session. Please try again.');
@@ -145,7 +149,7 @@ export default function SessionManager() {
       setCurrentSession(session);
       // Store message to show on home page after redirect
       sessionStorage.setItem('continuedSession', JSON.stringify({
-        message: `Now reading: ${session.name}`,
+        message: `${t.session.nowReading}: ${session.name}`,
         type: 'success'
       }));
       // Optionally redirect to main page
@@ -219,6 +223,24 @@ export default function SessionManager() {
   const handleCloseTranslations = () => {
     setViewingTranslations(null);
     setCurrentPageIndex(0);
+    setPageJumpInput('');
+  };
+
+  const handlePageJump = () => {
+    if (!viewingTranslations || !pageJumpInput) return;
+    
+    const pageNum = parseInt(pageJumpInput, 10);
+    if (isNaN(pageNum) || pageNum < 1 || pageNum > viewingTranslations.pages.length) {
+      alert(`${t.translations.invalidPageNumber} (1-${viewingTranslations.pages.length})`);
+      return;
+    }
+    
+    setCurrentPageIndex(pageNum - 1);
+    setPageJumpInput('');
+  };
+
+  const handleDirectPageClick = (pageIndex: number) => {
+    setCurrentPageIndex(pageIndex);
   };
 
   const formatDate = (dateString: string) => {
@@ -241,20 +263,20 @@ export default function SessionManager() {
     <>
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">📚 Comic Book Library ({sessions.length})</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">📚 {t.library.title} ({sessions.length})</h2>
         <div className="flex gap-2">
           <button
             onClick={loadSessions}
             disabled={!!loading}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
-            {loading ? 'Loading...' : 'Refresh'}
+            {loading ? t.common.loading : t.common.refresh}
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
             className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
           >
-            📚 New Comic
+            📚 {t.library.newComic}
           </button>
         </div>
       </div>
@@ -263,8 +285,8 @@ export default function SessionManager() {
       <div>
         {sessions.length === 0 ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <p className="text-lg mb-2">📚 No comic books yet</p>
-            <p className="text-sm">Create your first comic book to organize your translations</p>
+            <p className="text-lg mb-2">📚 {t.library.noComics}</p>
+            <p className="text-sm">{t.library.noComicsDescription}</p>
           </div>
         ) : (
             <div className="space-y-3">
@@ -285,7 +307,7 @@ export default function SessionManager() {
                             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                             : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
                         }`}>
-                          {session.metadata.completedPages}/{session.metadata.totalPages} pages
+                          {session.metadata.completedPages}/{session.metadata.totalPages} {t.library.pages}
                         </div>
                       </div>
                       
@@ -311,8 +333,8 @@ export default function SessionManager() {
                       )}
                       
                       <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                        <span>Created: {formatDate(session.createdAt)}</span>
-                        <span>Updated: {formatDate(session.updatedAt)}</span>
+                        <span>{t.library.created}: {formatDate(session.createdAt)}</span>
+                        <span>{t.library.updated}: {formatDate(session.updatedAt)}</span>
                       </div>
                     </div>
                     
@@ -323,7 +345,7 @@ export default function SessionManager() {
                           handleContinueSession(session.id);
                         }}
                         className="p-2 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400"
-                        title="Continue reading this comic"
+                        title={t.library.continueReading}
                       >
                         📖
                       </button>
@@ -337,7 +359,7 @@ export default function SessionManager() {
                             ? 'text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300'
                             : 'text-gray-500 hover:text-purple-600 dark:text-gray-400 dark:hover:text-purple-400'
                         }`}
-                        title={`View translations (${session.metadata.completedPages} completed)`}
+                        title={`${t.library.viewTranslations} (${session.metadata.completedPages} ${t.library.completed})`}
                       >
                         👀
                       </button>
@@ -347,7 +369,7 @@ export default function SessionManager() {
                           handleEditSession(session);
                         }}
                         className="p-2 text-gray-500 hover:text-yellow-600 dark:text-gray-400 dark:hover:text-yellow-400"
-                        title="Edit comic book details"
+                        title={t.library.editDetails}
                       >
                         ✏️
                       </button>
@@ -357,7 +379,7 @@ export default function SessionManager() {
                           handleExportSession(session.id, 'json');
                         }}
                         className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-                        title="Export as JSON"
+                        title={t.library.exportJson}
                       >
                         📄
                       </button>
@@ -367,7 +389,7 @@ export default function SessionManager() {
                           handleDeleteSession(session.id);
                         }}
                         className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
-                        title="Delete comic book"
+                        title={t.library.deleteComic}
                       >
                         🗑️
                       </button>
@@ -387,29 +409,29 @@ export default function SessionManager() {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
           <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-            📚 Create New Comic Book
+            📚 {t.library.createComic}
           </h3>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Comic Book Title *
+                {t.library.comicTitle} *
               </label>
               <input
                 type="text"
                 value={newSessionName}
                 onChange={(e) => setNewSessionName(e.target.value)}
-                placeholder="e.g., Batman Issue #1, Naruto Chapter 700"
+                placeholder={t.library.comicTitlePlaceholder}
                 className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Description (optional)
+                {t.library.description}
               </label>
               <textarea
                 value={newSessionDescription}
                 onChange={(e) => setNewSessionDescription(e.target.value)}
-                placeholder="Brief description of this comic book..."
+                placeholder={t.library.descriptionPlaceholder}
                 rows={3}
                 className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
@@ -421,7 +443,7 @@ export default function SessionManager() {
               disabled={!newSessionName || !newSessionName.trim()}
               className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 transition-colors"
             >
-              📖 Create & Start Reading
+              📖 {t.session.createAndStartReading}
             </button>
             <button
               onClick={() => {
@@ -431,7 +453,7 @@ export default function SessionManager() {
               }}
               className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
             >
-              Cancel
+              {t.common.cancel}
             </button>
           </div>
         </div>
@@ -483,7 +505,7 @@ export default function SessionManager() {
               onClick={handleCancelEdit}
               className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
             >
-              Cancel
+              {t.common.cancel}
             </button>
           </div>
         </div>
@@ -628,7 +650,7 @@ export default function SessionManager() {
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-              👀 {viewingTranslations.name} - Translations
+              👀 {viewingTranslations.name} - {t.translations.title}
             </h3>
             <button
               onClick={handleCloseTranslations}
@@ -640,30 +662,135 @@ export default function SessionManager() {
 
           {loadingTranslations ? (
             <div className="text-center py-8">
-              <p className="text-gray-500 dark:text-gray-400">Loading translations...</p>
+              <p className="text-gray-500 dark:text-gray-400">{t.translations.loadingTranslations}</p>
             </div>
           ) : (
             <div className="overflow-y-auto max-h-[calc(100vh-8rem)]">
-              {/* Page Navigation */}
+              {/* Enhanced Page Navigation */}
               {viewingTranslations.pages.length > 1 && (
-                <div className="flex items-center justify-between mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <button
-                    onClick={() => setCurrentPageIndex(Math.max(0, currentPageIndex - 1))}
-                    disabled={currentPageIndex === 0}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    ← Previous
-                  </button>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    Page {currentPageIndex + 1} of {viewingTranslations.pages.length}
-                  </span>
-                  <button
-                    onClick={() => setCurrentPageIndex(Math.min(viewingTranslations.pages.length - 1, currentPageIndex + 1))}
-                    disabled={currentPageIndex === viewingTranslations.pages.length - 1}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next →
-                  </button>
+                <div className="mb-6 space-y-4">
+                  {/* Main Navigation Bar */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <button
+                      onClick={() => setCurrentPageIndex(Math.max(0, currentPageIndex - 1))}
+                      disabled={currentPageIndex === 0}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      ← {t.common.previous}
+                    </button>
+                    
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                        {t.translations.pageInfo} {currentPageIndex + 1} of {viewingTranslations.pages.length}
+                      </span>
+                      
+                      {/* Quick Jump Input */}
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          value={pageJumpInput}
+                          onChange={(e) => {
+                            // Only allow numbers
+                            const value = e.target.value.replace(/[^0-9]/g, '');
+                            setPageJumpInput(value);
+                          }}
+                          onKeyPress={(e) => e.key === 'Enter' && handlePageJump()}
+                          placeholder={t.translations.enterPageNumber}
+                          autoComplete="new-password"
+                          autoCorrect="off"
+                          autoCapitalize="off"
+                          spellCheck="false"
+                          data-lpignore="true"
+                          data-form-type="other"
+                          data-1p-ignore="true"
+                          role="textbox"
+                          aria-label="Page number input"
+                          name="page-navigation-input"
+                          id="page-navigation-input"
+                          className="w-32 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-500 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                        <button
+                          onClick={handlePageJump}
+                          disabled={!pageJumpInput}
+                          className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                        >
+                          {t.common.go}
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => setCurrentPageIndex(Math.min(viewingTranslations.pages.length - 1, currentPageIndex + 1))}
+                      disabled={currentPageIndex === viewingTranslations.pages.length - 1}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {t.common.next} →
+                    </button>
+                  </div>
+                  
+                  {/* Page Number Pagination */}
+                  {viewingTranslations.pages.length > 2 && (
+                    <div className="flex justify-center">
+                      <div className="flex items-center gap-1 p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 max-w-full overflow-x-auto">
+                        {/* First page button */}
+                        {currentPageIndex > 2 && (
+                          <>
+                            <button
+                              onClick={() => handleDirectPageClick(0)}
+                              className="px-3 py-1 text-sm rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                            >
+                              1
+                            </button>
+                            {currentPageIndex > 3 && (
+                              <span className="px-2 text-gray-400">...</span>
+                            )}
+                          </>
+                        )}
+                        
+                        {/* Pages around current page */}
+                        {Array.from({ length: viewingTranslations.pages.length }, (_, i) => {
+                          const pageNum = i + 1;
+                          const isCurrentPage = i === currentPageIndex;
+                          const shouldShow = Math.abs(i - currentPageIndex) <= 2 || 
+                                           (currentPageIndex <= 2 && i < 5) ||
+                                           (currentPageIndex >= viewingTranslations.pages.length - 3 && i >= viewingTranslations.pages.length - 5);
+                          
+                          if (!shouldShow) return null;
+                          
+                          return (
+                            <button
+                              key={i}
+                              onClick={() => handleDirectPageClick(i)}
+                              className={`px-3 py-1 text-sm rounded transition-colors ${
+                                isCurrentPage
+                                  ? 'bg-blue-600 text-white'
+                                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
+                        
+                        {/* Last page button */}
+                        {currentPageIndex < viewingTranslations.pages.length - 3 && (
+                          <>
+                            {currentPageIndex < viewingTranslations.pages.length - 4 && (
+                              <span className="px-2 text-gray-400">...</span>
+                            )}
+                            <button
+                              onClick={() => handleDirectPageClick(viewingTranslations.pages.length - 1)}
+                              className="px-3 py-1 text-sm rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                            >
+                              {viewingTranslations.pages.length}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -689,7 +816,7 @@ export default function SessionManager() {
                     return (
                       <div className="text-center py-8">
                         <p className="text-gray-500 dark:text-gray-400">
-                          No translation data available for this page.
+                          {t.translations.noTranslationData}
                         </p>
                       </div>
                     );
@@ -703,8 +830,8 @@ export default function SessionManager() {
                           {currentPage.originalName}
                         </h4>
                         <div className="flex items-center gap-4 text-sm text-blue-700 dark:text-blue-300">
-                          <span>Status: {currentPage.status}</span>
-                          <span>Added: {formatDate(currentPage.addedAt)}</span>
+                          <span>{t.translations.status}: {currentPage.status}</span>
+                          <span>{t.translations.added}: {formatDate(currentPage.addedAt)}</span>
                         </div>
                       </div>
 
@@ -728,13 +855,13 @@ export default function SessionManager() {
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div>
-                                <h5 className="font-medium text-gray-900 dark:text-white mb-2">Original Text:</h5>
+                                <h5 className="font-medium text-gray-900 dark:text-white mb-2">{t.translations.originalText}</h5>
                                 <p className="text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-3 rounded">
                                   {item.original_text}
                                 </p>
                               </div>
                               <div>
-                                <h5 className="font-medium text-gray-900 dark:text-white mb-2">Chinese Translation:</h5>
+                                <h5 className="font-medium text-gray-900 dark:text-white mb-2">{t.translations.chineseTranslation}</h5>
                                 <p className="text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-3 rounded">
                                   {item.chinese_translation}
                                 </p>
@@ -743,7 +870,7 @@ export default function SessionManager() {
                             
                             {item.explanations && item.explanations.length > 0 && (
                               <div className="mt-4">
-                                <h5 className="font-medium text-gray-900 dark:text-white mb-2">Explanations:</h5>
+                                <h5 className="font-medium text-gray-900 dark:text-white mb-2">{t.translations.explanations}</h5>
                                 <div className="space-y-2">
                                   {item.explanations.map((explanation, expIndex) => (
                                     <div key={expIndex} className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded">
@@ -751,10 +878,10 @@ export default function SessionManager() {
                                         "{explanation.phrase}"
                                       </div>
                                       <div className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                                        <strong>Meaning:</strong> {explanation.meaning}
+                                        <strong>{t.translations.meaning}</strong> {explanation.meaning}
                                       </div>
                                       <div className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                                        <strong>Context:</strong> {explanation.context}
+                                        <strong>{t.translations.context}</strong> {explanation.context}
                                       </div>
                                     </div>
                                   ))}
@@ -770,7 +897,7 @@ export default function SessionManager() {
               ) : (
                 <div className="text-center py-8">
                   <p className="text-gray-500 dark:text-gray-400">
-                    No pages found in this comic book.
+                    {t.translations.noPages}
                   </p>
                 </div>
               )}

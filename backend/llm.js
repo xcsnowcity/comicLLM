@@ -53,8 +53,17 @@ For each text element, provide:
 2. Text type (speech_bubble, thought_bubble, narration, sound_effect, sign_text)
 3. Character name (if speech/thought bubble, use "Unknown" if unclear)
 4. Original English text (exact transcription)
-5. Chinese translation (natural, contextual translation)
-6. Brief explanations for difficult words/phrases (if any)
+5. Chinese translation (natural, contextual translation - pay careful attention to word context and meaning)
+6. Brief explanations for difficult words/phrases AND any potentially ambiguous terms
+
+TRANSLATION GUIDELINES:
+- Read the ENTIRE dialogue context before translating individual phrases
+- Pay attention to character relationships, tone, and speaking style
+- For ambiguous words, choose meaning that fits the visual and narrative context
+- Consider the comic's genre and setting when choosing vocabulary
+- When a word has multiple meanings, use surrounding context to determine the correct one
+- Preserve character voice and speech patterns in Chinese
+- Ensure translations sound natural and fluent in Chinese
 
 IMPORTANT: Return ONLY valid JSON. Do not include any text before or after the JSON. Ensure all strings are properly escaped.
 

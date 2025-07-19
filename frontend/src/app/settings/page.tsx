@@ -6,6 +6,7 @@ import { secureStorage } from '@/lib/storage';
 import StorageManager from '@/components/StorageManager';
 import SessionManager from '@/components/SessionManager';
 import Link from 'next/link';
+import { useT } from '@/lib/i18nContext';
 
 export default function Settings() {
   const { 
@@ -22,6 +23,8 @@ export default function Settings() {
   const [showApiKey, setShowApiKey] = useState(false);
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  
+  const t = useT();
 
   useEffect(() => {
     setIsClient(true);
@@ -80,12 +83,12 @@ export default function Settings() {
               href="/"
               className="text-blue-600 hover:text-blue-800 font-medium"
             >
-              ← Back to Home
+              ← {t.common.backToHome}
             </Link>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Settings</h1>
+          <h1 className="text-3xl font-bold mb-2">{t.settings.title}</h1>
           <p className="text-gray-600">
-            Configure your API settings and model preferences
+            {t.settings.apiSettings}
           </p>
         </div>
 
@@ -96,13 +99,13 @@ export default function Settings() {
 
         {/* API Configuration */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">API Configuration</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">{t.settings.apiSettings}</h2>
           
           <div className="space-y-6">
             {/* Provider Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                LLM Provider
+                {t.settings.provider}
               </label>
               <div className="space-y-2">
                 {providerOptions.map((option) => (
@@ -127,7 +130,7 @@ export default function Settings() {
             {/* Model Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Model
+                {t.settings.model}
               </label>
               <select
                 value={apiModel}
@@ -154,7 +157,7 @@ export default function Settings() {
             {/* API Key Input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                API Key
+                {t.settings.apiKey}
               </label>
               <div className="space-y-3">
                 <div className="flex gap-2">

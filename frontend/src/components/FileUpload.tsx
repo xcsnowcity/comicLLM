@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useT } from '@/lib/i18nContext';
 
 interface FileUploadProps {
   onFilesSelect: (files: File[]) => void;
@@ -10,6 +11,7 @@ interface FileUploadProps {
 
 export default function FileUpload({ onFilesSelect, isProcessing = false }: FileUploadProps) {
   const [dragActive, setDragActive] = useState(false);
+  const t = useT();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
@@ -46,15 +48,15 @@ export default function FileUpload({ onFilesSelect, isProcessing = false }: File
         </div>
         
         <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
-          {isProcessing ? 'Processing...' : 'Upload Comic Pages'}
+          {isProcessing ? t.common.processing : t.upload.title}
         </h2>
         
         <p className="text-gray-600 dark:text-gray-300 mb-6">
           {isProcessing 
-            ? 'Please wait while we analyze your comics...'
+            ? t.common.pleaseWait
             : isDragActive 
-              ? 'Drop the comic pages here'
-              : 'Drop comic pages here or click to select'
+              ? t.common.dropPages
+              : t.upload.dragDrop
           }
         </p>
         
@@ -63,15 +65,15 @@ export default function FileUpload({ onFilesSelect, isProcessing = false }: File
             className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors"
             disabled={isProcessing}
           >
-            Select Pages
+            {t.common.selectPages}
           </button>
         )}
       </div>
       
       <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-        Supported formats: JPEG, PNG, GIF, WebP (max 10MB each)
+        {t.upload.supportedFormats}
         <br />
-        Select single or multiple files - smart ordering applied automatically
+        {t.common.smartOrdering}
       </div>
     </div>
   );

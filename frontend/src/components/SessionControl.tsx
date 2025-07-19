@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
+import { useT } from '@/lib/i18nContext';
 
 export default function SessionControl() {
   const [showNewSessionModal, setShowNewSessionModal] = useState(false);
   const [newSessionName, setNewSessionName] = useState('');
   const [newSessionDescription, setNewSessionDescription] = useState('');
+  const [isInitializing, setIsInitializing] = useState(true);
+  const t = useT();
   
   const {
     currentSession,
@@ -26,7 +29,12 @@ export default function SessionControl() {
         console.warn('Failed to load current session, clearing:', error);
         setCurrentSessionId(null);
         setCurrentSession(null);
+      }).finally(() => {
+        setIsInitializing(false);
       });
+    } else {
+      // No session to load, stop initializing
+      setIsInitializing(false);
     }
   }, [currentSessionId, currentSession, loadCurrentSession, setCurrentSessionId, setCurrentSession]);
 
@@ -73,7 +81,7 @@ export default function SessionControl() {
     <div className="mb-6">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          📖 Current Comic Book
+          📖 {t.session.currentSession}
         </h3>
         <div className="flex items-center gap-2">
           <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
@@ -83,13 +91,20 @@ export default function SessionControl() {
               onChange={(e) => setAutoSaveEnabled(e.target.checked)}
               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            Auto-save
+            {t.common.autoSave}
           </label>
         </div>
       </div>
 
       {/* Current Session Display */}
-      {currentSession ? (
+      {isInitializing ? (
+        <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-gray-600 dark:text-gray-400 text-sm">Loading session...</span>
+          </div>
+        </div>
+      ) : currentSession ? (
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
           <div className="flex items-center justify-between">
             <div>
@@ -99,7 +114,7 @@ export default function SessionControl() {
                   {currentSession.name}
                 </span>
                 <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded-full">
-                  {currentSession.metadata.completedPages}/{currentSession.metadata.totalPages} pages translated
+                  {currentSession.metadata.completedPages}/{currentSession.metadata.totalPages} {t.library.pages} {t.common.translated}
                 </span>
               </div>
               {currentSession.description && (
@@ -108,7 +123,7 @@ export default function SessionControl() {
                 </p>
               )}
               <p className="text-xs text-blue-600 dark:text-blue-400">
-                Created: {formatDate(currentSession.createdAt)}
+                {t.common.created}: {formatDate(currentSession.createdAt)}
               </p>
             </div>
             <div>
@@ -116,7 +131,7 @@ export default function SessionControl() {
                 onClick={() => setShowNewSessionModal(true)}
                 className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
               >
-                📚 New Comic
+                📚 {t.common.newComic}
               </button>
             </div>
           </div>
@@ -126,12 +141,12 @@ export default function SessionControl() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-700 dark:text-gray-300 mb-1">
-                📚 No comic book selected
+                📚 {t.common.noComicSelected}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {autoSaveEnabled 
-                  ? 'A new comic book will be created automatically when you upload pages' 
-                  : 'Pages will be processed without organizing into a comic book'}
+                  ? t.common.autoCreateSession
+                  : t.common.pagesWithoutSession}
               </p>
             </div>
             <div className="flex gap-2">
@@ -139,13 +154,13 @@ export default function SessionControl() {
                 onClick={handleSelectExistingSession}
                 className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
               >
-                📖 Continue Reading
+                📖 {t.common.continueReading}
               </button>
               <button
                 onClick={() => setShowNewSessionModal(true)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
               >
-                📚 Start New Comic
+                📚 {t.common.startNewComic}
               </button>
             </div>
           </div>
@@ -157,29 +172,29 @@ export default function SessionControl() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-              📚 Start New Comic Book
+              📚 {t.session.createNewSession}
             </h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Comic Book Title *
+                  {t.common.comicBookTitle} *
                 </label>
                 <input
                   type="text"
                   value={newSessionName}
                   onChange={(e) => setNewSessionName(e.target.value)}
-                  placeholder="e.g., Batman Issue #1, Naruto Chapter 700"
+                  placeholder={t.library.comicTitlePlaceholder}
                   className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Description (optional)
+                  {t.common.description} ({t.library.description})
                 </label>
                 <textarea
                   value={newSessionDescription}
                   onChange={(e) => setNewSessionDescription(e.target.value)}
-                  placeholder="Brief description of this comic book..."
+                  placeholder={t.library.descriptionPlaceholder}
                   rows={3}
                   className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
@@ -191,7 +206,7 @@ export default function SessionControl() {
                 disabled={!newSessionName.trim()}
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
               >
-                📖 Start Reading
+                📖 {t.common.startReading}
               </button>
               <button
                 onClick={() => {
@@ -201,7 +216,7 @@ export default function SessionControl() {
                 }}
                 className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
               >
-                Cancel
+                {t.common.cancel}
               </button>
             </div>
           </div>

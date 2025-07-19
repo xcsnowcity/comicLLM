@@ -10,10 +10,12 @@ import ExportOptions from '@/components/ExportOptions';
 import BatchDisplay from '@/components/BatchDisplay';
 import SessionControl from '@/components/SessionControl';
 import { smartSortFiles, FileItem, fileItemsToFiles } from '@/lib/fileUtils';
+import { useT } from '@/lib/i18nContext';
 
 export default function Home() {
   const [selectedFiles, setSelectedFiles] = useState<FileItem[]>([]);
   const [duplicateMessage, setDuplicateMessage] = useState<string | null>(null);
+  const t = useT();
   
   const {
     isProcessing,
@@ -125,22 +127,22 @@ export default function Home() {
     <main className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">ComicLLM</h1>
+        <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">{t.app.title}</h1>
         <p className="text-xl text-gray-600 dark:text-gray-300">
-          Local comic text extraction and translation tool using LLMs
+          {t.app.subtitle}
         </p>
       </div>
 
       {/* Error Display */}
       {error && (
         <div className="max-w-2xl mx-auto mb-8 p-4 bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-600 rounded-lg">
-          <h3 className="font-semibold text-red-800 dark:text-red-200 mb-2">Error</h3>
+          <h3 className="font-semibold text-red-800 dark:text-red-200 mb-2">{t.common.error}</h3>
           <p className="text-red-700 dark:text-red-300">{error}</p>
           <button
             onClick={handleReset}
             className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
           >
-            Try Again
+            {t.common.tryAgain}
           </button>
         </div>
       )}
