@@ -31,12 +31,12 @@ export default function Settings() {
   }, []);
 
   const handleClearData = () => {
-    if (confirm('Are you sure you want to clear all stored data including API keys?')) {
+    if (confirm(t.settings.confirmClearData)) {
       secureStorage.clearAll();
       setApiKey('');
       setApiProvider('openrouter');
       setApiModel('google/gemini-2.5-flash-lite-preview-06-17');
-      alert('All data cleared successfully!');
+      alert(t.settings.dataClearedSuccess);
     }
   };
   
@@ -46,7 +46,7 @@ export default function Settings() {
       label: 'OpenRouter', 
       description: 'Access to multiple models via OpenRouter' 
     }
-    // Temporarily disabled - focus on OpenRouter for now
+    // Other providers temporarily hidden - focusing on OpenRouter for simplicity
     // { 
     //   value: 'openai', 
     //   label: 'OpenAI', 
@@ -57,21 +57,33 @@ export default function Settings() {
     //   label: 'Anthropic', 
     //   description: 'Claude models via Anthropic API' 
     // }
+    // DeepSeek temporarily disabled - vision capabilities not sufficient for comic processing
+    // { 
+    //   value: 'deepseek', 
+    //   label: 'DeepSeek', 
+    //   description: 'DeepSeek AI models (text-only, no vision support yet)' 
+    // }
   ];
 
-  const modelOptions = {
-    openrouter: [
-      'google/gemini-2.5-flash-lite-preview-06-17'
-    ],
-    openai: [
-      'gpt-4-vision-preview',
-      'gpt-4o'
-    ],
-    anthropic: [
-      'claude-3-5-sonnet-20241022',
-      'claude-3-opus-20240229'
-    ]
-  };
+  // Model options removed - now using free text input for flexibility
+  // const modelOptions = {
+  //   openrouter: [
+  //     'google/gemini-2.5-flash-lite-preview-06-17'
+  //   ],
+  //   openai: [
+  //     'gpt-4-vision-preview',
+  //     'gpt-4o'
+  //   ],
+  //   anthropic: [
+  //     'claude-3-5-sonnet-20241022',
+  //     'claude-3-opus-20240229'
+  //   ]
+  //   // DeepSeek models - commented out due to lack of vision support
+  //   // deepseek: [
+  //   //   'deepseek-chat',
+  //   //   'deepseek-reasoner'
+  //   // ]
+  // };
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -132,26 +144,30 @@ export default function Settings() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t.settings.model}
               </label>
-              <select
+              <input
+                type="text"
                 value={apiModel}
                 onChange={(e) => setApiModel(e.target.value)}
+                placeholder={t.settings.modelPlaceholder}
                 className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                {modelOptions[apiProvider].map((model) => (
-                  <option key={model} value={model}>
-                    {model}
-                  </option>
-                ))}
-              </select>
-              <div className="mt-2 flex items-center gap-2">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Current:</span>
-                <span className="text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
-                  {apiModel}
-                </span>
+              />
+              <div className="mt-2 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">{t.settings.currentModel}:</span>
+                  <span className="text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
+                    {apiModel || t.settings.noModelSelected}
+                  </span>
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="font-medium mb-1">{t.settings.popularModels}:</p>
+                  <ul className="space-y-1 ml-4">
+                    <li>• <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">google/gemini-2.5-flash-lite-preview-06-17</code> - Fast and cost-effective</li>
+                    <li>• <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">openai/gpt-4o</code> - High quality</li>
+                    <li>• <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">anthropic/claude-3-5-sonnet-20241022</code> - Excellent analysis</li>
+                  </ul>
+                  <p className="mt-2">Visit <a href="https://openrouter.ai/models" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">openrouter.ai/models</a> for full list</p>
+                </div>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Choose the model that best fits your needs and budget
-              </p>
             </div>
 
             {/* API Key Input */}
@@ -165,7 +181,7 @@ export default function Settings() {
                     type={showApiKeyInput ? 'text' : 'password'}
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
-                    placeholder={`Enter your ${apiProvider} API key`}
+                    placeholder={t.settings.apiKeyPlaceholder}
                     className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                   <button
@@ -212,7 +228,7 @@ export default function Settings() {
                             ? 'text-green-800 dark:text-green-200' 
                             : 'text-red-800 dark:text-red-200'
                         }`}>
-                          {apiTestResult.success ? 'Connection Successful!' : 'Connection Failed'}
+                          {apiTestResult.success ? t.settings.connectionSuccess : t.settings.connectionError}
                         </p>
                         <p className={`text-sm ${
                           apiTestResult.success 
@@ -227,7 +243,7 @@ export default function Settings() {
                 )}
                 
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Your API key is stored locally in your browser and never sent to our servers
+                  {t.settings.privacyNotes[0]}
                 </p>
               </div>
             </div>
@@ -236,7 +252,7 @@ export default function Settings() {
 
         {/* Privacy & Data Management */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Privacy & Data Management</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">{t.settings.privacyDataManagement}</h2>
           
           <div className="space-y-4">
             <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-4">
@@ -244,13 +260,12 @@ export default function Settings() {
                 <span className="text-green-600 dark:text-green-400 mt-0.5">🔒</span>
                 <div>
                   <p className="text-sm font-medium text-green-800 dark:text-green-200">
-                    Your Privacy is Protected
+                    {t.settings.privacyProtected}
                   </p>
                   <ul className="text-sm text-green-700 dark:text-green-300 mt-1 space-y-1">
-                    <li>• API keys are stored locally in your browser only</li>
-                    <li>• No data is sent to our servers or stored in the cloud</li>
-                    <li>• All processing happens on your device and LLM providers</li>
-                    <li>• Your API keys are never committed to GitHub</li>
+                    {t.settings.privacyNotes.map((note, index) => (
+                      <li key={index}>• {note}</li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -258,16 +273,16 @@ export default function Settings() {
             
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium text-gray-900 dark:text-white">Clear Stored Data</h3>
+                <h3 className="font-medium text-gray-900 dark:text-white">{t.settings.clearStoredData}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Remove all locally stored API keys and settings
+                  {t.settings.clearDataDesc}
                 </p>
               </div>
               <button
                 onClick={handleClearData}
                 className="px-4 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
               >
-                Clear All Data
+                {t.settings.clearAllData}
               </button>
             </div>
           </div>
@@ -275,31 +290,34 @@ export default function Settings() {
 
         {/* Getting API Keys */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Getting API Keys</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">{t.settings.gettingApiKeys}</h2>
           
           <div className="space-y-4">
             <div>
-              <h3 className="font-medium mb-2 text-gray-900 dark:text-white">Get your OpenRouter API key:</h3>
+              <h3 className="font-medium mb-3 text-gray-900 dark:text-white">🔄 {t.settings.openrouterSetup}</h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    Visit{' '}
-                    <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                      openrouter.ai
-                    </a>{' '}to create an account and get your API key
+                    {t.settings.visitOpenRouter}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    Go to "Keys" section in your dashboard
+                    {t.settings.goToDashboard}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    Create a new API key and copy it
+                    {t.settings.createApiKey}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {t.settings.browseModels}
                   </span>
                 </div>
               </div>
@@ -310,10 +328,10 @@ export default function Settings() {
                 <span className="text-blue-600 dark:text-blue-400 mt-0.5">💡</span>
                 <div>
                   <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                    Tip: OpenRouter Recommended
+                    {t.settings.whyOpenrouter}
                   </p>
                   <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                    OpenRouter provides access to many models including Google's Gemini with competitive pricing and no waitlists.
+                    {t.settings.whyOpenrouterDesc}
                   </p>
                 </div>
               </div>
@@ -326,23 +344,26 @@ export default function Settings() {
 
         {/* Usage Tips */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mt-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Usage Tips</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">{t.settings.usageTips}</h2>
           
           <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
             <div>
-              <strong className="text-gray-900 dark:text-white">OpenRouter:</strong> Recommended for access to multiple models with competitive pricing
+              <strong className="text-gray-900 dark:text-white">{t.settings.modelSelection}:</strong> {t.settings.modelSelectionDesc} <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">google/gemini-2.5-flash-lite-preview-06-17</code> {t.settings.forComicProcessing}
             </div>
             <div>
-              <strong className="text-gray-900 dark:text-white">Image Quality:</strong> Higher resolution images generally produce better text extraction
+              <strong className="text-gray-900 dark:text-white">{t.settings.costQuality}:</strong> {t.settings.costQualityDesc}
             </div>
             <div>
-              <strong className="text-gray-900 dark:text-white">Cost Management:</strong> Vision models are more expensive than text-only models
+              <strong className="text-gray-900 dark:text-white">{t.settings.imageQuality}:</strong> {t.settings.imageQualityDesc}
             </div>
             <div>
-              <strong className="text-gray-900 dark:text-white">Languages:</strong> Currently optimized for English to Chinese translation
+              <strong className="text-gray-900 dark:text-white">{t.settings.modelPricing}:</strong> {t.settings.modelPricingDesc}
             </div>
             <div>
-              <strong className="text-gray-900 dark:text-white">Storage:</strong> Hash-based deduplication automatically saves space by storing identical files only once
+              <strong className="text-gray-900 dark:text-white">{t.settings.languages}:</strong> {t.settings.languagesDesc}
+            </div>
+            <div>
+              <strong className="text-gray-900 dark:text-white">{t.settings.storage}:</strong> {t.settings.storageDesc}
             </div>
           </div>
         </div>

@@ -7,6 +7,8 @@ class LLMService {
     this.openrouterKey = process.env.OPENROUTER_API_KEY;
     this.openaiKey = process.env.OPENAI_API_KEY;
     this.anthropicKey = process.env.ANTHROPIC_API_KEY;
+    // DeepSeek temporarily disabled - insufficient vision capabilities for comic processing
+    // this.deepseekKey = process.env.DEEPSEEK_API_KEY;
     this.defaultProvider = process.env.DEFAULT_PROVIDER || 'openrouter';
     this.defaultModel = process.env.DEFAULT_MODEL || 'openai/gpt-4-vision-preview';
   }
@@ -34,6 +36,10 @@ class LLMService {
         case 'anthropic':
           response = await this.callAnthropic(prompt, base64Image, mimeType, model, apiKey);
           break;
+        // DeepSeek temporarily disabled - insufficient vision capabilities
+        // case 'deepseek':
+        //   response = await this.callDeepSeek(prompt, base64Image, mimeType, model, apiKey);
+        //   break;
         default:
           throw new Error(`Unsupported provider: ${provider}`);
       }
@@ -197,6 +203,42 @@ Be thorough - don't miss any text including small sound effects or background si
     return response.data.content[0].text;
   }
 
+  // DeepSeek integration temporarily disabled - insufficient vision capabilities for comic processing
+  // async callDeepSeek(prompt, base64Image, mimeType, model, apiKey) {
+  //   const key = apiKey || this.deepseekKey;
+  //   if (!key) {
+  //     throw new Error('DeepSeek API key not configured');
+  //   }
+
+  //   // Note: DeepSeek currently doesn't support vision models
+  //   // This implementation will work when they add vision capabilities
+  //   // For now, it will throw an error indicating vision is not supported
+    
+  //   // Check if this is a vision request (has image)
+  //   if (base64Image) {
+  //     throw new Error('DeepSeek does not currently support vision/image analysis. Please use OpenAI, Anthropic, or OpenRouter for comic image processing.');
+  //   }
+
+  //   const response = await axios.post('https://api.deepseek.com/v1/chat/completions', {
+  //     model: model,
+  //     messages: [
+  //       {
+  //         role: 'user',
+  //         content: prompt
+  //       }
+  //     ],
+  //     max_tokens: 8000,
+  //     response_format: { type: 'json_object' }
+  //   }, {
+  //     headers: {
+  //       'Authorization': `Bearer ${key}`,
+  //       'Content-Type': 'application/json'
+  //     }
+  //   });
+
+  //   return response.data.choices[0].message.content;
+  // }
+
   async testConnection(provider, model, apiKey) {
     try {
       const testPrompt = "Hello! Please respond with a simple JSON object containing a 'status' field set to 'success'.";
@@ -243,6 +285,20 @@ Be thorough - don't miss any text including small sound effects or background si
             }
           });
           break;
+          
+        // DeepSeek temporarily disabled - insufficient vision capabilities
+        // case 'deepseek':
+        //   response = await axios.post('https://api.deepseek.com/v1/chat/completions', {
+        //     model: model,
+        //     messages: [{ role: 'user', content: testPrompt }],
+        //     max_tokens: 50
+        //   }, {
+        //     headers: {
+        //       'Authorization': `Bearer ${apiKey}`,
+        //       'Content-Type': 'application/json'
+        //     }
+        //   });
+        //   break;
           
         default:
           throw new Error(`Unsupported provider: ${provider}`);

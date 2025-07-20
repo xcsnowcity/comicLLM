@@ -50,7 +50,7 @@ interface AppState {
   autoSaveEnabled: boolean;
   
   // Settings
-  apiProvider: 'openrouter' | 'openai' | 'anthropic';
+  apiProvider: 'openrouter'; // Other providers hidden for simplicity: | 'openai' | 'anthropic' | 'deepseek'
   apiModel: string;
   apiKey: string;
   
@@ -63,7 +63,7 @@ interface AppState {
   setCurrentFile: (file: File | null) => void;
   setCurrentResult: (result: ComicResult | null) => void;
   setError: (error: string | null) => void;
-  setApiProvider: (provider: 'openrouter' | 'openai' | 'anthropic') => void;
+  setApiProvider: (provider: 'openrouter') => void; // Other providers hidden: | 'openai' | 'anthropic' | 'deepseek'
   setApiModel: (model: string) => void;
   setApiKey: (key: string) => void;
   setIsTestingApi: (testing: boolean) => void;
