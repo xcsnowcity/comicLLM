@@ -62,7 +62,7 @@ app.post('/api/upload', upload.single('comic'), async (req, res) => {
 
 app.post('/api/process', async (req, res) => {
   try {
-    const { filename, sessionId, provider, model, apiKey, hash } = req.body;
+    const { filename, sessionId, provider, model, apiKey, hash, temperature } = req.body;
     
     if (!filename || !sessionId) {
       return res.status(400).json({ error: 'Missing filename or sessionId' });
@@ -85,7 +85,7 @@ app.post('/api/process', async (req, res) => {
     }
 
     // Process the comic using LLM
-    const result = await llmService.processComic(filePath, { provider, model, apiKey });
+    const result = await llmService.processComic(filePath, { provider, model, apiKey, temperature });
     
     // Save the result using storage manager
     await storageManager.storeResult(fileHash, sessionId, result);

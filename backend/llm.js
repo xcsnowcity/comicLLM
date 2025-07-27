@@ -14,7 +14,7 @@ class LLMService {
   }
 
   async processComic(imagePath, options = {}) {
-    const { provider = this.defaultProvider, model = this.defaultModel, apiKey } = options;
+    const { provider = this.defaultProvider, model = this.defaultModel, apiKey, temperature = 0.7 } = options;
     
     try {
       // Read image file and convert to base64
@@ -28,7 +28,7 @@ class LLMService {
       
       switch (provider) {
         case 'openrouter':
-          response = await this.callOpenRouter(prompt, base64Image, mimeType, model, apiKey);
+          response = await this.callOpenRouter(prompt, base64Image, mimeType, model, apiKey, temperature);
           break;
         case 'openai':
           response = await this.callOpenAI(prompt, base64Image, mimeType, model, apiKey);
@@ -104,7 +104,7 @@ Consider:
 Be thorough - don't miss any text including small sound effects or background signs. If no text is found, return an empty reading_order array.`;
   }
 
-  async callOpenRouter(prompt, base64Image, mimeType, model, apiKey) {
+  async callOpenRouter(prompt, base64Image, mimeType, model, apiKey, temperature = 0.7) {
     const key = apiKey || this.openrouterKey;
     if (!key) {
       throw new Error('OpenRouter API key not configured');
@@ -125,6 +125,7 @@ Be thorough - don't miss any text including small sound effects or background si
         }
       ],
       max_tokens: 8000,
+      temperature: temperature,
       response_format: { type: 'json_object' }
     }, {
       headers: {

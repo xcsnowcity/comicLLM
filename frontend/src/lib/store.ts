@@ -53,6 +53,7 @@ interface AppState {
   apiProvider: 'openrouter'; // Other providers hidden for simplicity: | 'openai' | 'anthropic' | 'deepseek'
   apiModel: string;
   apiKey: string;
+  temperature: number;
   
   // API test state
   isTestingApi: boolean;
@@ -66,6 +67,7 @@ interface AppState {
   setApiProvider: (provider: 'openrouter') => void; // Other providers hidden: | 'openai' | 'anthropic' | 'deepseek'
   setApiModel: (model: string) => void;
   setApiKey: (key: string) => void;
+  setTemperature: (temperature: number) => void;
   setIsTestingApi: (testing: boolean) => void;
   setApiTestResult: (result: { success: boolean; message: string } | null) => void;
   
@@ -125,6 +127,7 @@ export const useAppStore = create<AppState>((set, get) => {
     apiProvider: initialValues.apiProvider,
     apiModel: initialValues.apiModel,
     apiKey: initialValues.apiKey,
+    temperature: initialValues.temperature,
     isTestingApi: false,
     apiTestResult: null,
   
@@ -144,6 +147,10 @@ export const useAppStore = create<AppState>((set, get) => {
     setApiKey: (key) => {
       set({ apiKey: key });
       secureStorage.saveApiKey(key);
+    },
+    setTemperature: (temperature) => {
+      set({ temperature });
+      secureStorage.saveTemperature(temperature);
     },
     setIsTestingApi: (testing) => set({ isTestingApi: testing }),
     setApiTestResult: (result) => set({ apiTestResult: result }),
@@ -226,7 +233,7 @@ export const useAppStore = create<AppState>((set, get) => {
   },
   
   processComic: async (filename: string, sessionId: string, hash?: string) => {
-    const { apiProvider, apiModel, apiKey } = get();
+    const { apiProvider, apiModel, apiKey, temperature } = get();
     
     const response = await axios.post('/api/process', {
       filename,
@@ -234,7 +241,8 @@ export const useAppStore = create<AppState>((set, get) => {
       hash,
       provider: apiProvider,
       model: apiModel,
-      apiKey
+      apiKey,
+      temperature
     });
     
     return response.data;

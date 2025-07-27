@@ -13,11 +13,13 @@ export default function Settings() {
     apiProvider, 
     apiModel, 
     apiKey,
+    temperature,
     isTestingApi,
     apiTestResult,
     setApiProvider, 
     setApiModel,
     setApiKey,
+    setTemperature,
     testApiConnection
   } = useAppStore();
   const [showApiKey, setShowApiKey] = useState(false);
@@ -36,6 +38,7 @@ export default function Settings() {
       setApiKey('');
       setApiProvider('openrouter');
       setApiModel('google/gemini-2.5-flash-lite-preview-06-17');
+      setTemperature(0.7);
       alert(t.settings.dataClearedSuccess);
     }
   };
@@ -169,6 +172,34 @@ export default function Settings() {
                 </div>
               </div>
             </div>
+
+            {/* Temperature Setting */}
+            {apiProvider === 'openrouter' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Temperature ({temperature})
+                </label>
+                <div className="space-y-3">
+                  <input
+                    type="range"
+                    min="0"
+                    max="2"
+                    step="0.1"
+                    value={temperature}
+                    onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                    className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span>0.0 (More focused)</span>
+                    <span>1.0 (Balanced)</span>
+                    <span>2.0 (More creative)</span>
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Temperature controls the randomness of the model output. Lower values make the output more focused and deterministic, while higher values make it more creative and varied.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* API Key Input */}
             <div>

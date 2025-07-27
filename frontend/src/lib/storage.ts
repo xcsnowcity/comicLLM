@@ -5,6 +5,7 @@ const STORAGE_KEYS = {
   API_KEY: 'comicllm_api_key',
   API_PROVIDER: 'comicllm_api_provider',
   API_MODEL: 'comicllm_api_model',
+  TEMPERATURE: 'comicllm_temperature',
   CURRENT_SESSION: 'comicllm_current_session',
   AUTO_SAVE_ENABLED: 'comicllm_auto_save_enabled',
 } as const;
@@ -53,6 +54,22 @@ export const secureStorage = {
       return localStorage.getItem(STORAGE_KEYS.API_MODEL) || 'google/gemini-2.5-flash-lite-preview-06-17';
     }
     return 'google/gemini-2.5-flash-lite-preview-06-17';
+  },
+
+  // Save temperature
+  saveTemperature: (temperature: number): void => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEYS.TEMPERATURE, temperature.toString());
+    }
+  },
+
+  // Get temperature
+  getTemperature: (): number => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEYS.TEMPERATURE);
+      return saved ? parseFloat(saved) : 0.7;
+    }
+    return 0.7;
   },
 
   // Clear all stored data
@@ -116,6 +133,7 @@ export const getInitialStoreValues = () => {
     apiKey: secureStorage.getApiKey(),
     apiProvider: secureStorage.getApiProvider() as 'openrouter' | 'openai' | 'anthropic',
     apiModel: secureStorage.getApiModel(),
+    temperature: secureStorage.getTemperature(),
     currentSessionId: sessionStorage.getCurrentSession(),
     autoSaveEnabled: sessionStorage.getAutoSaveEnabled(),
   };
